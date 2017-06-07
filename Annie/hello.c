@@ -11,6 +11,8 @@ int main(int argc, char* argv[]){
  	char message[100];
 	MPI_Status status;
 
+    printf("hello, I am running and ready for mpi stuff\n") ;
+        
 	MPI_Init(&argc, &argv);
 
 	MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
