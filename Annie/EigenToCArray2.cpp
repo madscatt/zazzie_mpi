@@ -39,15 +39,18 @@ cout << "" << endl;
 	z.push_back(z_values[count]);
 	cout << z[count] << endl;
 	}
-	
+cout << "" << endl;
 
-	Eigen::Array<int,Eigen::Dynamic,Eigen::Dynamic> x_Eigen ; 
+	Eigen::Array<int,Eigen::Dynamic,Eigen::Dynamic> x_Eigen; 
         Eigen::Array<int,Eigen::Dynamic,Eigen::Dynamic> y_Eigen ; 
         Eigen::Array<int,Eigen::Dynamic,Eigen::Dynamic> z_Eigen ; 
 
+	x_Eigen.setZero(count_x, 1);
+        y_Eigen.setZero(count_y, 1);
+        z_Eigen.setZero(count_z, 1);
+
 	for(count = 0; count!=count_x; ++count){
 	x_Eigen(count) = x[count];
-	 cout << x_Eigen(count) << endl;
 	}
 cout << x_Eigen << endl;
 cout << "" << endl;
@@ -65,5 +68,25 @@ cout << "" << endl;
 	}
 cout << z_Eigen << endl;
 
-	
+	int xc[count_x];
+	int yc[count_y];
+	int zc[count_z];
+
+	for(count = 0; count!=count_x; ++count){
+	xc[count] = x_Eigen(count);
+	cout << xc[count] << endl;
+	}
+cout << "" << endl;
+
+	for(count = 0; count!=count_y; ++count){
+	yc[count] = y_Eigen(count);
+ 	cout << yc[count] << endl;
+	}
+cout << "" << endl;
+
+	for(count = 0; count!=count_z; ++count){
+	zc[count] = z_Eigen(count);
+	cout << zc[count] << endl;
+	}
+
 }
