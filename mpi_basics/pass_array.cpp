@@ -25,15 +25,19 @@ int main(int argc, char* argv[]){
     int natoms = 10 ; 
     float x[nframes][natoms] ;
 
+    int count = 1 ;
     for(int i=0 ; i < nframes ; i++){
         for(int j = 0 ; j < natoms ; j++){
-            x[i][j] = float(i*j) ;
+            x[i][j] = float(count) ;
+            count++ ;
         }
     }
 
     printf("%s\n", "outside mpi") ;
-	printf("%f\n", x[0][1]);
-	printf("%f\n", x[1][1]);
+	printf("x[0][0] = %f\n", x[0][0]);
+	printf("x[0][1] = %f\n", x[0][1]);
+	printf("x[1][0] = %f\n", x[1][0]);
+	printf("x[1][1] = %f\n", x[1][1]);
 
     MPI_Init(&argc, &argv);
 
@@ -54,7 +58,7 @@ int main(int argc, char* argv[]){
 	    //sprintf(message, "Hello from process %d!", my_rank);
 	    dest = 0;
 	    //MPI_Send(message, strlen(message) + 1, MPI_CHAR, dest, tag, MPI_COMM_WORLD);
-	    for(source = 1; source < number_of_processes; source ++) {
+	    for(source = 1; source < number_of_processes-1; source ++) {
             MPI_Send(&(x[source][0]), natoms, MPI_FLOAT, source, 0, MPI_COMM_WORLD) ;
         };
 	    //MPI_Send(&(x[0][0]), 1, column_mpi_t, 1, 0, MPI_COMM_WORLD) ;
@@ -62,7 +66,7 @@ int main(int argc, char* argv[]){
     else{
 	    //for(source = 1; source < number_of_processes; source ++) {
 	        //MPI_Recv(message, 100, MPI_CHAR, source, tag, MPI_COMM_WORLD, &status);
-	    for(source = 1; source < number_of_processes; source ++) {
+	    for(source = 1; source < number_of_processes-1; source ++) {
 	        MPI_Recv(&(x[source][0]), natoms, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, &status) ;
 	        //MPI_Recv(&(x[0][0]), 1, column_mpi_t, 0, 0, MPI_COMM_WORLD, &status) ;
 	        //printf("%s\n", message);
