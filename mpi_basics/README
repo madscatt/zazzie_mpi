@@ -1,4 +1,24 @@
 # folder containing small bits of code to explore functionality of MPI for
 data array transfers
 
+###
+cat hosts 
+
+onsager 
+
+compute-0-0
+
+compute-0-1
+
+### these use openmpi (onsager)
+mpirun -n 3 template.exe
+
+mpirun -n 3 --hostfile hosts template.exe
+
+mpiexec -np 2 -nolocal -pernode -machinefile hosts template.exe
+
+### these use mpich (onsager)
+
+mpirun.mpich -np 4 -machinefile hosts ./template.exe
+
 
