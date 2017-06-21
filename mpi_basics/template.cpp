@@ -12,7 +12,7 @@ void sleep(unsigned int mseconds)
 
 int main(int argc, char* argv[]){
 	int my_rank;
-	int p;
+	int number_of_processes;
 	int source;
 	int dest;
 	int tag = 0;
@@ -25,12 +25,12 @@ int main(int argc, char* argv[]){
 
     MPI_Init(&argc, &argv);
 
-	MPI_Comm_size(MPI_COMM_WORLD, &p);
+	MPI_Comm_size(MPI_COMM_WORLD, &number_of_processes);
 	MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
     MPI_Get_processor_name(processor_name , &name_length) ;
 
-    printf("my_rank = %d\t p = %d\n", my_rank, p) ;
+    printf("my_rank = %d\t number_of_processes = %d\n", my_rank, number_of_processes) ;
     printf("processor_name = %s\n", processor_name) ;
 
     if(my_rank != 0){
@@ -39,7 +39,7 @@ int main(int argc, char* argv[]){
 	    MPI_Send(message, strlen(message) + 1, MPI_CHAR, dest, tag, MPI_COMM_WORLD);
     }
     else{
-	    for(source = 1; source < p; source ++) {
+	    for(source = 1; source < number_of_processes; source ++) {
 	        MPI_Recv(message, 100, MPI_CHAR, source, tag, MPI_COMM_WORLD, &status);
 	        printf("%s\n", message);
 	} ; 

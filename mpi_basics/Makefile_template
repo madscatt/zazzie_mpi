@@ -1,0 +1,18 @@
+DIRINC=/usr/include/mpich/
+DIRLIB=/usr/lib/mpich/
+
+CC=mpicc
+
+CCFLAGS=-std=c++11 -c -fPIC -w -g -I$(DIRINC) 
+LDFLAGS=-std=c++11 -g -w -I$(DIRINC) 
+
+SRC=template.cpp 
+
+all: template.o
+	$(CC) template.o -o template.exe
+
+template.o: template.cpp
+	$(CC) -c template.cpp $(CCFLAGS) -I$(DIRINC)  
+
+clean:
+	rm -Rf *.o *.exe
