@@ -48,22 +48,39 @@ int main(int argc, char* argv[]){
 
     MPI_Get_processor_name(processor_name , &name_length) ;
 
+    printf("my_rank = %d\t number_of_processes = %d\n", my_rank, number_of_processes) ;
+    printf("processor_name = %s\n", processor_name) ;
+
+    //MPI_Datatype column_mpi_t ;
+
+    //MPI_Type_vector(10, 1, np, MPI_FLOAT, &column_mpi_t) ;
+    //MPI_Type_commit(&column_mpi_t);
+
     if(my_rank != 0){
-        sprintf(message, "Hello from process rank = %d : running on %s", my_rank, processor_name);
+	    sprintf(message, "Hello from process %d!", my_rank);
 	    dest = 0;
 	    MPI_Send(message, strlen(message) + 1, MPI_CHAR, dest, tag, MPI_COMM_WORLD);
-        MPI_Send(&(x[my_rank*2][0]), natoms, MPI_FLOAT, dest, 0, MPI_COMM_WORLD) ;
+         MPI_Send(&(x[my_rank*2][0]), natoms, MPI_FLOAT, dest, 0, MPI_COMM_WORLD) ;
+        //};
+	    //MPI_Send(&(x[0][0]), 1, column_mpi_t, 1, 0, MPI_COMM_WORLD) ;
     }
     else{
+	    //for(source = 1; source < number_of_processes; source ++) {
+	        //MPI_Recv(message, 100, MPI_CHAR, source, tag, MPI_COMM_WORLD, &status);
 	    for(source = 1; source < number_of_processes; source ++) {
 	        MPI_Recv(message, 100, MPI_CHAR, source, tag, MPI_COMM_WORLD, &status);
+	    //    MPI_Recv(&(x[source][0]), natoms, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, &status) ;
 	        MPI_Recv(&(x[0][0]), natoms, MPI_FLOAT, source, 0, MPI_COMM_WORLD, &status) ;
+	        //MPI_Recv(&(x[0][0]), 1, column_mpi_t, 0, 0, MPI_COMM_WORLD, &status) ;
 	        printf("%s\n", message);
 	        printf("x[0][0] = %f\n", x[0][0]);
 	        printf("x[0][1] = %f\n", x[0][1]);
 	        printf("x[0][8] = %f\n", x[0][8]);
 	        printf("x[0][9] = %f\n", x[0][9]);
+	        //printf("x[1][0] = %f\n", x[1][0]);
+	        //printf("x[1][1] = %f\n", x[1][1]);
         };
+	//} ; 
 	} ; 
 
 	MPI_Finalize();
