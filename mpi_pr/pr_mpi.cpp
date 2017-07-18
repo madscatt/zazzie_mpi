@@ -86,10 +86,44 @@ int main(){
 	bin_width = 1.0 ;
 
     std::vector<std::vector<int> > hist(nframes, std::vector<int>(nbins,       0));
+
+    float **x = new float*[nframes] ;
+    float **y = new float*[nframes] ;
+    float **z = new float*[nframes] ;
+
+    for(int i=0 ; i < nframes ; i++){
+        x[i] = new float[natoms] ;
+        y[i] = new float[natoms] ;
+        z[i] = new float[natoms] ;
+    }
     
+
+/*    malloc2D(&x, nframes, natoms);
+    malloc2D(&y, nframes, natoms);
+    malloc2D(&z, nframes, natoms);
+ */ 
+    std::cout << "hello here is some eigen stuff" << "\n" ;
+    std::cout << "x(0,0) = " << mol.x(0,0) << "\n" ;
+    std::cout << "y(0,0) = " << mol.y(0,0) << "\n" ;
+    std::cout << "z(0,0) = " << mol.z(0,0) << "\n" ;
+
+    /*
+    for(frame=0 ; frame < mol.number_of_frames ; frame++){
+        for(int i=0 ; i < mol.natoms; i++){
+            x[frame][i] = mol.x(i, frame) ; 
+            y[frame][i] = mol.y(i, frame) ; 
+            z[frame][i] = mol.z(i, frame) ; 
+        } 
+    }
+    */ 
     //get_distances(mol.coor(), nframes, natoms, hist, nbins, bin_width) ; 
     //get_distances(c_array, nframes, natoms, hist, nbins, bin_width) ; 
-    
+  
+/* 
+    free2D(&x) ; 
+    free2D(&y) ; 
+    free2D(&z) ;
+*/ 
     return 0 ;
 
 
