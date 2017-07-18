@@ -24,7 +24,7 @@ void get_distances(double **x, double **y, double **z, const int nframes, const 
     double this_low_bin, this_high_bin ;
     unsigned long long local_count ; 
     unsigned long long local_hist[nbins] ; 
-    unsigned long long z ; 
+    unsigned long long m ;
 
     std::ostringstream sstream;
     std::string remark = "#oacc_pr_output";
@@ -56,7 +56,7 @@ void get_distances(double **x, double **y, double **z, const int nframes, const 
     //#pragma acc data copyin(coor[nframes][natoms][3]) copy(dist[npairs], local_dist[npairs], local_hist[nbins])
     {
     for(i=0 ; i < nframes ; i++){
-        for(z=0; z < npairs ; z++) { local_dist[z] = 0.0 ; }
+        for(m=0; m < npairs ; m++) { local_dist[m] = 0.0 ; }
         for(j=0; j < nbins ; j++) { local_hist[j] = 0 ; }
         std::cout << "." << std::flush ;
         #pragma acc parallel loop
@@ -95,14 +95,9 @@ void get_distances(double **x, double **y, double **z, const int nframes, const 
         } // end of pragma acc parallel loop
         
         if(i<nframes){ 
-            //outfile << sstream ;
             for(k=0 ; k < nbins ; k++){
-    //            output_file << local_hist[k] << "\n" ;
                 hist[i][k] = local_hist[k] ;
-            //sstream << dist[z]/double(nframes) << endl;
             }
-     //       output_file << "#\n" ;
-      //      output_file.flush() ;
         }
 
     } // end of i-loop
