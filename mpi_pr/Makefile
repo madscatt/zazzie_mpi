@@ -9,7 +9,7 @@ DIRLIB=/share/apps/local/core_libraries/lib/
 DIRLIB_OACC=./openacc/
 
 CC=/share/apps/local/bin/g++
-CC=/share/apps/local/pgi/linux86-64/16.10/bin/pgc++
+#CC=/share/apps/local/pgi/linux86-64/16.10/bin/pgc++
 
 # mac (tested)
 
@@ -23,12 +23,12 @@ CC=/share/apps/local/pgi/linux86-64/16.10/bin/pgc++
 
 # set flags
 
-CCFLAGS=-std=c++11 -fPIE -w -g -I$(DIRINC) -I$(DIRINC_BOOST) -I$(DIRLIB_OACC)
-CCFLAGS=-c11 -w -g -I$(DIRINC) -I$(DIRINC_BOOST) -I$(DIRLIB_OACC)
+CPPFLAGS=-std=c++11 -fPIE -w -g -I$(DIRINC) -I$(DIRINC_BOOST) -I$(DIRLIB_OACC)
+#CPPFLAGS=-c11 -v -w -g -I$(DIRINC) -I$(DIRINC_BOOST) -I$(DIRLIB_OACC)
 #CCFLAGS=-std=c++11 -c -fPIC -fPIE -w -g -I$(DIRINC) -I$(DIRINC_BOOST) -I$(DIRLIB_OACC)
 #LDFLAGS=-std=c++11 -g -w -I$(DIRINC) -I$(DIRINC_BOOST) -I$(DIRLIB_OACC)
-#LDFLAGS=-std=c++11 -g -w -pie -I$(DIRINC) -I$(DIRINC_BOOST) -I$(DIRLIB_OACC)
-LDFLAGS=-c11 -g -w -I$(DIRINC) -I$(DIRINC_BOOST) -I$(DIRLIB_OACC)
+LDFLAGS=-std=c++11 -g -w -pie -I$(DIRINC) -I$(DIRINC_BOOST) -I$(DIRLIB_OACC)
+#LDFLAGS=-c11 -g -w -I$(DIRINC) -I$(DIRINC_BOOST) -I$(DIRLIB_OACC)
 
 # set sasmol library
 #
@@ -79,7 +79,7 @@ PGI_LIBS += $(PGI_LIB_9) $(PGI_LIB_10) $(PGI_LIB_11) $(PGI_LIB_12) $(PGI_LIB_13)
 #$(CC) $< $(LDFLAGS) -L$(DIRLIB_BOOST) -L$(DIRLIB) -L$(DIRLIB_OACC) -l$(LIB_OACC)  -l$(LIB) $(DIRLIB_BOOST)/libboost_regex.a $(PGI_LIBS) -o $@
 
 pr_mpi.out: pr_mpi.cpp $(LIBRARY) $(LIBRARY_OACC)
-	$(CC) $< $(CCFLAGS) -L$(DIRLIB_BOOST) -L$(DIRLIB) -L$(DIRLIB_OACC) -l$(LIB_OACC)  -l$(LIB) $(DIRLIB_BOOST)/libboost_regex.a $(PGI_LIBS) -o $@
+	$(CC) $< $(CPPFLAGS) -L$(DIRLIB_BOOST) -L$(DIRLIB) -L$(DIRLIB_OACC) -l$(LIB_OACC)  -l$(LIB) $(DIRLIB_BOOST)/libboost_regex.a $(PGI_LIBS) -o $@
 
 clean:
 	rm -Rf pr_mpi.out *.o *.so pgprof*
