@@ -10,9 +10,12 @@
 
 #include <vector>
 
+//extern "C" {
 #include "openacc/oacc_pr.h"
+//}
 
-extern void get_distances();
+
+//extern void get_distances();
 
 /********* methods        ******************/
 
@@ -66,14 +69,15 @@ int main(){
 	std::cout << "TESTING DCD READ STEP" << std::endl << std::endl ;
 	int input_frame = 0 ;
 
-//    mol.read_dcd(dcd_input_file_name) ;
+    mol.read_dcd(dcd_input_file_name) ;
 
-    int f = 0 ;
+/*    int f = 0 ;
     for(frame=0 ; frame < input_nset ; frame++){ 
 //	    std::cout << "frame = " << frame << std::endl ; 
         mol.read_dcd_step( dcd_file_pointer, f , input_natoms, input_reverseEndian) ;	
     } ;	
 	int close_read_result = close_dcd_read(dcd_file_pointer) ;
+*/
 
 	std::cout << "number_of_frames = " << mol.number_of_frames << std::endl ;
 
@@ -87,14 +91,14 @@ int main(){
 
     std::vector<std::vector<int> > hist(nframes, std::vector<int>(nbins,       0));
 
-    float **x = new float*[nframes] ;
-    float **y = new float*[nframes] ;
-    float **z = new float*[nframes] ;
+    double **x = new double*[nframes] ;
+    double **y = new double*[nframes] ;
+    double **z = new double*[nframes] ;
 
     for(int i=0 ; i < nframes ; i++){
-        x[i] = new float[natoms] ;
-        y[i] = new float[natoms] ;
-        z[i] = new float[natoms] ;
+        x[i] = new double[natoms] ;
+        y[i] = new double[natoms] ;
+        z[i] = new double[natoms] ;
     }
     
 
@@ -107,16 +111,19 @@ int main(){
     std::cout << "y(0,0) = " << mol.y(0,0) << "\n" ;
     std::cout << "z(0,0) = " << mol.z(0,0) << "\n" ;
 
-    /*
+    std::cout<< "size x = " << mol.x.size() << "\n" ;
+
+   // for(frame=0 ; frame < 2 ; frame++){
     for(frame=0 ; frame < mol.number_of_frames ; frame++){
         for(int i=0 ; i < mol.natoms; i++){
             x[frame][i] = mol.x(i, frame) ; 
             y[frame][i] = mol.y(i, frame) ; 
             z[frame][i] = mol.z(i, frame) ; 
+
         } 
     }
-    */ 
-    //get_distances(mol.coor(), nframes, natoms, hist, nbins, bin_width) ; 
+
+    get_distances(x, y, z, nframes, natoms, hist, nbins, bin_width) ; 
     //get_distances(c_array, nframes, natoms, hist, nbins, bin_width) ; 
   
 /* 
