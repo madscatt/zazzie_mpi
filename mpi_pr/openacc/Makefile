@@ -1,7 +1,6 @@
 #cluster
 
 CC=/share/apps/local/pgi/linux86-64/2016/bin/pgc++
-IFLAGS= ''
 
 #mac
 
@@ -21,7 +20,7 @@ CFLAGS= -fPIC  -Bstatic_pgi -c -fast -acc -Minfo=accel -ta=tesla:cuda8,fastmath 
 #CFLAGS= -fPIC -c -fast -acc -Minfo=accel -ta=tesla:nordc,fastmath -O3 -shared
 #CFLAGS= -fPIC -c -fast -acc -Minfo=accel -ta=multicore -O3 -shared
 #CFLAGS= -fPIC -c -fast -acc -Minfo=accel -ta=multicore -O3 -shared 
-#CFLAGS= -fPIC -c -fast -acc -Minfo=accel -ta=multicore -O3  -I$(IFLAGS)
+CFLAGS= -fPIC -c -fast -acc -Minfo=accel -ta=multicore -O3  
 
 #CC=g++
 #CFLAGS= -fPIC -c -O3 -shared 
