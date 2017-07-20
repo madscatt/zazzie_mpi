@@ -24,6 +24,7 @@ void get_distances(double **x, double **y, double **z, const int nframes, const 
     double this_low_bin, this_high_bin ;
     unsigned long long local_count ; 
     unsigned long long local_hist[nbins] ; 
+    unsigned long long parallel_hist[nframes][nbins] ; 
     unsigned long long m ;
 
     std::ostringstream sstream;
@@ -65,12 +66,13 @@ void get_distances(double **x, double **y, double **z, const int nframes, const 
     //output_file.open("dum.txt") ;
 
     std::cout << "starting parallel loops" << std::endl ; 
-    #pragma acc data copyin(x[nframes][natoms], y[nframes][natoms], z[nframes][natoms]) copy(dist[npairs], local_dist[npairs], local_hist[nbins])
+    #pragma acc data copyin(x[nframes][natoms], y[nframes][natoms], z[nframes][natoms]) copy(parallel_hist[nframes][nbins], dist[npairs], local_dist[npairs], local_hist[nbins])
     //#pragma acc data copyin(coor[nframes][natoms][3]) copy(dist[npairs], local_dist[npairs], local_hist[nbins])
     {
     for(i=0 ; i < nframes ; i++){
         for(m=0; m < npairs ; m++) { local_dist[m] = 0.0 ; }
         for(j=0; j < nbins ; j++) { local_hist[j] = 0 ; }
+        for(j=0; j < nbins ; j++) { parallel_hist[i][j] = 0 ; }
         std::cout << "." << std::flush ;
         #pragma acc parallel loop
         {
@@ -98,6 +100,7 @@ void get_distances(double **x, double **y, double **z, const int nframes, const 
                     this_high_bin = this_low_bin + bin_width ;
                     if(sdist > this_low_bin && sdist <= this_high_bin){
                         local_hist[l] += 1 ;
+                        parallel_hist[i][l] += 1 ;
                         break;
                     }
                 } // end of l-loop
@@ -106,12 +109,14 @@ void get_distances(double **x, double **y, double **z, const int nframes, const 
             } // end of pragma acc loop
         } // end of j-loop
         } // end of pragma acc parallel loop
-        
+
+        /*
         if(i<nframes){ 
             for(k=0 ; k < nbins ; k++){
-                hist[i][k] = local_hist[k] ;
+                parallel_hist[i][k] = local_hist[k] ;
             }
         }
+        */
 
     } // end of i-loop
 
@@ -119,6 +124,7 @@ void get_distances(double **x, double **y, double **z, const int nframes, const 
     
     for(i=0 ; i < nframes ; i++){
         for(k=0 ; k < nbins ; k++){
+            hist[i][k] = parallel_hist[i][k] ;
             outfile << k << "\t" << hist[i][k] << std::endl;
         }
         outfile << std::endl ;
