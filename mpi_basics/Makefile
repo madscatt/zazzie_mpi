@@ -1,7 +1,13 @@
+
+# onsager
 DIRINC=/usr/include/mpich/
 DIRLIB=/usr/lib/mpich/
 
-CC=mpicc
+#entropy
+DIRINC=/usr/lib64/openmpi/include
+DIRLIB=/usr/lib64/openmpi/
+
+CC=mpic++
 
 CCFLAGS=-std=c++11 -c -fPIC -w -g -I$(DIRINC) 
 LDFLAGS=-std=c++11 -g -w -I$(DIRINC) 
