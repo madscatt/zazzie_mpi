@@ -10,6 +10,7 @@ DIRLIB_OACC=./openacc/
 
 CC=/share/apps/local/bin/g++
 CC=/usr/lib64/openmpi/bin/mpic++
+CC=/usr/lib64/mpich/bin/mpic++
 #CC=/share/apps/local/pgi/linux86-64/16.10/bin/pgc++
 
 # mac (tested)

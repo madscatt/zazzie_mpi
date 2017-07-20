@@ -15,7 +15,7 @@
 
 using namespace std;
 
-void get_distances(double **x, double **y, double **z, const int nframes, const int natoms, const int nbins, const double bin_width) {
+void get_distances(double **x, double **y, double **z, const int nframes, const int natoms, std::vector<std::vector<int> >& hist, const int nbins, const double bin_width) {
 
     int i,j,k,l ;
     unsigned long long npairs ;
@@ -121,8 +121,7 @@ void get_distances(double **x, double **y, double **z, const int nframes, const 
     } // end of i-loop
 
     } // end of pragma acc data 
-   
-/* 
+    
     for(i=0 ; i < nframes ; i++){
         for(k=0 ; k < nbins ; k++){
             hist[i][k] = parallel_hist[i][k] ;
@@ -132,7 +131,6 @@ void get_distances(double **x, double **y, double **z, const int nframes, const 
     }
 
  //   outfile.close();
-*/
 
     std::cout << std::endl << "leaving oacc" << std::endl ;
 
