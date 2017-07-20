@@ -105,9 +105,22 @@ int main(){
     }
     
     std::cout << "hello here is some eigen stuff" << "\n" ;
+    std::cout << "atom 0: frame 0" << std::endl ;
     std::cout << "x(0,0) = " << mol.x(0,0) << "\n" ;
     std::cout << "y(0,0) = " << mol.y(0,0) << "\n" ;
     std::cout << "z(0,0) = " << mol.z(0,0) << "\n" ;
+    std::cout << "atom 1: frame 0" << std::endl ;
+    std::cout << "x(1,0) = " << mol.x(1,0) << "\n" ;
+    std::cout << "y(1,0) = " << mol.y(1,0) << "\n" ;
+    std::cout << "z(1,0) = " << mol.z(1,0) << "\n" ;
+    std::cout << "atom 0: frame 1" << std::endl ;
+    std::cout << "x(0,1) = " << mol.x(0,1) << "\n" ;
+    std::cout << "y(0,1) = " << mol.y(0,1) << "\n" ;
+    std::cout << "z(0,1) = " << mol.z(0,1) << "\n" ;
+    std::cout << "atom 1: frame 1" << std::endl ;
+    std::cout << "x(1,1) = " << mol.x(1,1) << "\n" ;
+    std::cout << "y(1,1) = " << mol.y(1,1) << "\n" ;
+    std::cout << "z(1,1) = " << mol.z(1,1) << "\n" ;
 
     std::cout<< "size x = " << mol.x.size() << "\n" ;
 

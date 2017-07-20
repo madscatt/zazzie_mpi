@@ -30,15 +30,28 @@ void get_distances(double **x, double **y, double **z, const int nframes, const 
     std::string remark = "#oacc_pr_output";
     const std::string filename = "dum_oacc.txt";
     
-    //std::ofstream output_file ;
-    //std::ofstream outfile(filename.c_str()) ;
-    //outfile << remark << std::endl;
+    std::ofstream outfile(filename.c_str()) ;
+    outfile << remark << std::endl;
   
     printf("oacc: %d\n", nframes) ;
     printf("oacc: %d\n", natoms) ;
+    printf("oacc: %d\n", natoms) ;
+    printf("oacc: frame 0 : atom 0\n") ;
     printf("oacc: x[0][0] = %f\n", x[0][0]) ;
     printf("oacc: y[0][0] = %f\n", y[0][0]) ;
     printf("oacc: z[0][0] = %f\n", z[0][0]) ;
+    printf("oacc: frame 0 : atom 1\n") ;
+    printf("oacc: x[0][1] = %f\n", x[0][1]) ;
+    printf("oacc: y[0][1] = %f\n", y[0][1]) ;
+    printf("oacc: z[0][1] = %f\n", z[0][1]) ;
+    printf("oacc: frame 1 : atom 0\n") ;
+    printf("oacc: x[1][0] = %f\n", x[1][0]) ;
+    printf("oacc: y[1][0] = %f\n", y[1][0]) ;
+    printf("oacc: z[1][0] = %f\n", z[1][0]) ;
+    printf("oacc: frame 1 : atom 1\n") ;
+    printf("oacc: x[1][1] = %f\n", x[1][1]) ;
+    printf("oacc: y[1][1] = %f\n", y[1][1]) ;
+    printf("oacc: z[1][1] = %f\n", z[1][1]) ;
 
     npairs = (natoms * (natoms - 1))/2 ;
     double dist[npairs] ;
@@ -101,13 +114,19 @@ void get_distances(double **x, double **y, double **z, const int nframes, const 
         }
 
     } // end of i-loop
+
     } // end of pragma acc data 
+    
+    for(i=0 ; i < nframes ; i++){
+        for(k=0 ; k < nbins ; k++){
+            outfile << k << "\t" << hist[i][k] << std::endl;
+        }
+        outfile << std::endl ;
+    }
 
-    std::cout << std::endl ;
+    outfile.close();
 
-    //output_file.close();
-
-    std::cout << "leaving oacc" << std::endl ;
+    std::cout << std::endl << "leaving oacc" << std::endl ;
 
     return ;
 }
