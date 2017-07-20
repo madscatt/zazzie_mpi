@@ -129,9 +129,9 @@ int main(int argc, char **argv){
     //const int xn_frames = 1000 ; // nframes ; // number of columns or frames for x coor
     const int xn_frames = read_frames ; // nframes ; // number of columns or frames for x coor
 
-    double **localx = new double*[nframes] ;
-    double **localy = new double*[nframes] ;
-    double **localz = new double*[nframes] ;
+    double **localx = new double*[xn_frames/xproc_frames] ;
+    double **localy = new double*[xn_frames/xproc_frames] ;
+    double **localz = new double*[xn_frames/xproc_frames] ;
 
     for(int i=0 ; i < nframes ; i++){
         localx[i] = new double[natoms] ;
@@ -144,7 +144,7 @@ int main(int argc, char **argv){
     int starts[2] = {0, 0} ;
 
     MPI_Datatype type, subarrtype ;
-    MPI_Type_create_subarray(2, sizes, subsizes, starts, MPI_ORDER_C, MPI_FLOAT, &type) ;
+    MPI_Type_create_subarray(2, sizes, subsizes, starts, MPI_ORDER_C, MPI_DOUBLE, &type) ;
     MPI_Type_create_resized(type, 0, xn_frames/xproc_frames *sizeof(double), &subarrtype) ;
     MPI_Type_commit(&subarrtype) ;
 
@@ -157,22 +157,27 @@ int main(int argc, char **argv){
         globalptry = &(y[0][0]) ;
         globalptrz = &(z[0][0]) ;
     
-        for(i = 0 ; i < xn_atoms * xproc_frames; i++){
+    }
+
+    if (rank == 0) {
+        for (i=0; i<xn_atoms*xproc_frames; i++)
             sendcounts[i] = 1;
-        }
-        int disp = 0 ;
-        for(i = 0 ; i < xn_atoms ; i++){
-            for(j = 0 ; j < xproc_frames ; j++){
-                displs[i * xproc_frames + j] = disp ;
-                disp += 1 ;
+        int disp = 0;
+        for (i=0; i<xn_atoms; i++) {
+            for (j=0; j<xproc_frames; j++) {
+                displs[i*xproc_frames+j] = disp;
+                disp += 1;
             }
-            disp += (( xn_frames / xproc_frames) - 1) * xproc_frames ;
+            disp += ((xn_frames/xproc_frames)-1)*xproc_frames;
         }
     }
 
+    MPI_Barrier(MPI_COMM_WORLD) ;
+/*
     MPI_Scatterv(globalptrx, sendcounts, displs, subarrtype, &(localx[0][0]),
-        xn_atoms*xn_frames/(xproc_frames), MPI_DOUBLE,
-        0, MPI_COMM_WORLD);
+                 xn_atoms*xn_frames/(xproc_frames), MPI_DOUBLE,
+                 0, MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD) ;
 
     MPI_Scatterv(globalptry, sendcounts, displs, subarrtype, &(localy[0][0]),
         xn_atoms*xn_frames/(xproc_frames), MPI_DOUBLE,
@@ -181,6 +186,7 @@ int main(int argc, char **argv){
     MPI_Scatterv(globalptrz, sendcounts, displs, subarrtype, &(localz[0][0]),
         xn_atoms*xn_frames/(xproc_frames), MPI_DOUBLE,
         0, MPI_COMM_WORLD);
+*/
 
 //    std::vector<std::vector<int> > local_hist(xn_frames/xproc_frames, std::vector<int>(nbins, 0));
  //   get_distances(localx, localy, localz, xn_frames/xproc_frames, natoms, local_hist, nbins, bin_width) ; 
@@ -195,19 +201,19 @@ int main(int argc, char **argv){
     //}
 
     std::cout << "done with MPI stuff" << std::endl ;  
+    MPI_Barrier(MPI_COMM_WORLD) ;
 
-    delete [] localx ; 
-    delete [] localy ; 
-    delete [] localz ; 
+//    delete [] localx ; 
+ //   delete [] localy ; 
+  //  delete [] localz ; 
 
     MPI_Type_free(&subarrtype) ;
     
-    delete [] x ; 
-    delete [] y ; 
-    delete [] z ; 
+    //delete [] x ; 
+   // delete [] y ; 
+   // delete [] z ; 
     
     MPI_Finalize() ;
-    
     return 0 ;
 
 
