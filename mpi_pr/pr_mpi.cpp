@@ -53,8 +53,6 @@ int main(int argc, char **argv){
 	    std::cout << "number of atoms = " << mol._natoms() << std::endl ;
 	    std::cout << "total mass = " << mol._total_mass() << std::endl ;
 
-	    std::cout << "number_of_frames = " << mol.number_of_frames << std::endl ;
-
 	    FILE *dcd_file_pointer ;
 
 	    dcd_file_pointer = sasio::open_dcd_read(dcd_input_file_name, input_natoms, input_nset, input_reverseEndian) ;
@@ -73,7 +71,7 @@ int main(int argc, char **argv){
 //        mol.read_dcd(dcd_input_file_name) ;
 
 //        for(frame=0 ; frame < input_nset ; frame++){ 
-        for(frame=0 ; frame < 200 ; frame++){ 
+        for(frame=0 ; frame < read_frames ; frame++){ 
             mol.read_dcd_step(dcd_file_pointer, frame, input_natoms, input_reverseEndian) ;	
         } ;	
 	    int close_read_result = close_dcd_read(dcd_file_pointer) ;
@@ -122,7 +120,10 @@ int main(int argc, char **argv){
             } 
         }
 
+        std::cout << "x.rows = " << mol.x.rows() << std::endl ;
+        std::cout << "x.cols = " << mol.x.cols() << std::endl ;
     } ;
+
 
     const int xn_atoms = 148 ; // natoms ; // number of rows or atoms for x coor
     //const int xn_frames = 1000 ; // nframes ; // number of columns or frames for x coor
@@ -132,7 +133,7 @@ int main(int argc, char **argv){
     double **localy = new double*[xn_frames/xproc_frames] ;
     double **localz = new double*[xn_frames/xproc_frames] ;
 
-    for(int i=0 ; i < nframes ; i++){
+    for(int i=0 ; i < xn_frames/xproc_frames ; i++){
         localx[i] = new double[natoms] ;
         localy[i] = new double[natoms] ;
         localz[i] = new double[natoms] ;
@@ -144,7 +145,7 @@ int main(int argc, char **argv){
 
     MPI_Datatype type, subarrtype ;
     MPI_Type_create_subarray(2, sizes, subsizes, starts, MPI_ORDER_C, MPI_DOUBLE, &type) ;
-    MPI_Type_create_resized(type, 0, xn_frames/xproc_frames *sizeof(double), &subarrtype) ;
+    MPI_Type_create_resized(type, 0, xn_frames/xproc_frames*sizeof(double), &subarrtype) ;
     MPI_Type_commit(&subarrtype) ;
 
     int sendcounts[xn_atoms*xproc_frames] ;
@@ -172,45 +173,46 @@ int main(int argc, char **argv){
     }
 
     MPI_Barrier(MPI_COMM_WORLD) ;
-/*
-    MPI_Scatterv(globalptrx, sendcounts, displs, subarrtype, &(localx[0][0]),
-                 xn_atoms*xn_frames/(xproc_frames), MPI_DOUBLE,
-                 0, MPI_COMM_WORLD);
+            //xn_atoms*xn_atoms/(xproc_frames*xproc_frames), MPI_DOUBLE,
+ 
+    MPI_Scatterv(&globalptrx[0], sendcounts, displs, subarrtype, &(localx[0][0]),
+                xn_atoms*xn_frames/(xproc_frames), MPI_DOUBLE,
+                0, MPI_COMM_WORLD);
+
     MPI_Barrier(MPI_COMM_WORLD) ;
 
-    MPI_Scatterv(globalptry, sendcounts, displs, subarrtype, &(localy[0][0]),
+    MPI_Scatterv(&globalptry[0], sendcounts, displs, subarrtype, &(localy[0][0]),
         xn_atoms*xn_frames/(xproc_frames), MPI_DOUBLE,
         0, MPI_COMM_WORLD);
 
-    MPI_Scatterv(globalptrz, sendcounts, displs, subarrtype, &(localz[0][0]),
+    MPI_Scatterv(&globalptrz[0], sendcounts, displs, subarrtype, &(localz[0][0]),
         xn_atoms*xn_frames/(xproc_frames), MPI_DOUBLE,
         0, MPI_COMM_WORLD);
-*/
+
 
 //    std::vector<std::vector<int> > local_hist(xn_frames/xproc_frames, std::vector<int>(nbins, 0));
  //   get_distances(localx, localy, localz, xn_frames/xproc_frames, natoms, local_hist, nbins, bin_width) ; 
  
     //get_distances(localx, localy, localz, xn_frames/xproc_frames, xn_atoms, nbins, bin_width) ; 
-   // for(p = 0 ; p < size ; p++){
-    //    if(rank == p){
-     //       std::cout << "Local process on rank : " << rank << std::endl ;
-      //      //get_distances(localx, localy, localz, xn_frames/xproc_frames, xn_atoms, nbins, bin_width) ; 
-       // }
-        //MPI_Barrier(MPI_COMM_WORLD) ;
-    //}
+    for(p = 0 ; p < size ; p++){
+        if(rank == p){
+            std::cout << "Local process on rank : " << rank << std::endl ;
+    //        get_distances(localx, localy, localz, xn_frames/xproc_frames, xn_atoms, nbins, bin_width) ; 
+       }
+    } 
 
     std::cout << "done with MPI stuff" << std::endl ;  
     MPI_Barrier(MPI_COMM_WORLD) ;
 
-//    delete [] localx ; 
- //   delete [] localy ; 
-  //  delete [] localz ; 
+    delete [] localx ; 
+    delete [] localy ; 
+    delete [] localz ; 
 
     MPI_Type_free(&subarrtype) ;
     
-    //delete [] x ; 
-   // delete [] y ; 
-   // delete [] z ; 
+    delete [] x ; 
+    delete [] y ; 
+    delete [] z ; 
     
     MPI_Finalize() ;
     return 0 ;
