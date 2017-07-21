@@ -1,0 +1,30 @@
+
+# cluster
+
+DIRINC_BOOST=/share/apps/local/boost_1_57_0/
+DIRLIB_BOOST=/share/apps/local/boost_1_57_0/libs/
+DIRLIB_BOOST=/share/apps/local/boost_1_57_0/stage/lib/
+CC=/share/apps/local/bin/g++
+
+# mac
+
+DIRINC_BOOST=/usr/local/include/
+DIRLIB_BOOST=/usr/local/lib/
+
+DIRINC=/usr/local/core_libraries/include/
+DIRLIB=/usr/local/core_libraries/lib/
+CC=g++
+
+CCFLAGS=-std=c++11 -c -fPIC -w -g -I$(DIRINC) -I$(DIRINC_BOOST)
+
+LDFLAGS=-std=c++11 -g -w -I$(DIRINC) -I$(DIRINC_BOOST) -Wl
+
+LIB=sasmol
+LIBRARY=$(DIRLIB)lib$(LIB).a
+
+pr_mpi.out: pr_mpi.cpp $(LIBRARY)
+	$(CC) $< $(LDFLAGS) -L$(DIRLIB_BOOST) -L$(DIRLIB) -l$(LIB) $(DIRLIB_BOOST)/libboost_regex.a -o $@
+
+clean:
+	rm -Rf pr_mpi.out *.o *.so pgprof*
+
