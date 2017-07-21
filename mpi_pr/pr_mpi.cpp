@@ -27,7 +27,7 @@ int main(int argc, char **argv){
 	std::string dcd_input_file_name = "ten_mer.dcd" ;
 	int input_natoms, input_nset, input_reverseEndian ;
 	int nframes, natoms ;
-    int read_frames = 200 ;
+    int read_frames = 400 ;
     int nbins = 200 ; 
 	double bin_width = 1.0 ;  
 
@@ -35,28 +35,26 @@ int main(int argc, char **argv){
 
     double **x, **y, **z ; 	
     std::cout << "\n\n\n" ;
+	const std::string pdb_filename = "ten_mer.pdb" ;
 	
     int rank, size ;
     MPI_Init(&argc, &argv) ;
     MPI_Comm_size(MPI_COMM_WORLD, &size) ;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank) ;
-
-	sasmol::SasMol mol ;
 	
 	util::compile_time(__FILE__, __func__, __DATE__, __TIME__ );
-
-	const std::string pdb_filename = "ten_mer.pdb" ;
 
 	std::cout << "mpi / multicore / gpu p[r] calculator" << " " << pdb_filename << std::endl ; 
     if(rank == 0){
 
+	    sasmol::SasMol mol ;
 	    mol.read_pdb(pdb_filename);
 
 	    std::cout << "number of atoms = " << mol._natoms() << std::endl ;
 	    std::cout << "total mass = " << mol._total_mass() << std::endl ;
 
 	    std::cout << "number_of_frames = " << mol.number_of_frames << std::endl ;
-    
+
 	    FILE *dcd_file_pointer ;
 
 	    dcd_file_pointer = sasio::open_dcd_read(dcd_input_file_name, input_natoms, input_nset, input_reverseEndian) ;
@@ -72,7 +70,9 @@ int main(int argc, char **argv){
         mol.y.setZero(mol.natoms, input_nset);
         mol.z.setZero(mol.natoms, input_nset);
 
-        //for(frame=0 ; frame < input_nset ; frame++){ 
+//        mol.read_dcd(dcd_input_file_name) ;
+
+//        for(frame=0 ; frame < input_nset ; frame++){ 
         for(frame=0 ; frame < 200 ; frame++){ 
             mol.read_dcd_step(dcd_file_pointer, frame, input_natoms, input_reverseEndian) ;	
         } ;	
@@ -123,7 +123,6 @@ int main(int argc, char **argv){
         }
 
     } ;
-
 
     const int xn_atoms = 148 ; // natoms ; // number of rows or atoms for x coor
     //const int xn_frames = 1000 ; // nframes ; // number of columns or frames for x coor
