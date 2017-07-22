@@ -25,11 +25,9 @@ int main(int argc, char* argv[]){
     int natoms = 10 ; 
     float x[nframes][natoms] ;
 
-    int count = 1 ;
     for(int i=0 ; i < nframes ; i++){
         for(int j = 0 ; j < natoms ; j++){
-            x[i][j] = float(count) ;
-            count++ ;
+            x[i][j] = float(i*10) + float(j) ;
         }
     }
 
