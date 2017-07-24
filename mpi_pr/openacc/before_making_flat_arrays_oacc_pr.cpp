@@ -15,7 +15,7 @@
 
 using namespace std;
 
-void get_distances(double *x, double *y, double *z, const int nframes, const int natoms, const int nbins, const double bin_width) {
+void get_distances(double **x, double **y, double **z, const int nframes, const int natoms, const int nbins, const double bin_width) {
 
     int i,j,k,l ;
     unsigned long long npairs ;
@@ -38,21 +38,21 @@ void get_distances(double *x, double *y, double *z, const int nframes, const int
     printf("oacc: %d\n", natoms) ;
     printf("oacc: %d\n", natoms) ;
     printf("oacc: frame 0 : atom 0\n") ;
-    printf("oacc: x[0][0] = %f\n", x[0]) ;
-    printf("oacc: y[0][0] = %f\n", y[0]) ;
-    printf("oacc: z[0][0] = %f\n", z[0]) ;
+    printf("oacc: x[0][0] = %f\n", x[0][0]) ;
+    printf("oacc: y[0][0] = %f\n", y[0][0]) ;
+    printf("oacc: z[0][0] = %f\n", z[0][0]) ;
     printf("oacc: frame 0 : atom 1\n") ;
-    printf("oacc: x[0][1] = %f\n", x[1]) ;
-    printf("oacc: y[0][1] = %f\n", y[1]) ;
-    printf("oacc: z[0][1] = %f\n", z[1]) ;
+    printf("oacc: x[0][1] = %f\n", x[0][1]) ;
+    printf("oacc: y[0][1] = %f\n", y[0][1]) ;
+    printf("oacc: z[0][1] = %f\n", z[0][1]) ;
     printf("oacc: frame 1 : atom 0\n") ;
-    printf("oacc: x[1][0] = %f\n", x[natoms]) ;
-    printf("oacc: y[1][0] = %f\n", y[natoms]) ;
-    printf("oacc: z[1][0] = %f\n", z[natoms]) ;
+    printf("oacc: x[1][0] = %f\n", x[1][0]) ;
+    printf("oacc: y[1][0] = %f\n", y[1][0]) ;
+    printf("oacc: z[1][0] = %f\n", z[1][0]) ;
     printf("oacc: frame 1 : atom 1\n") ;
-    printf("oacc: x[1][1] = %f\n", x[natoms+1]) ;
-    printf("oacc: y[1][1] = %f\n", y[natoms+1]) ;
-    printf("oacc: z[1][1] = %f\n", z[natoms+1]) ;
+    printf("oacc: x[1][1] = %f\n", x[1][1]) ;
+    printf("oacc: y[1][1] = %f\n", y[1][1]) ;
+    printf("oacc: z[1][1] = %f\n", z[1][1]) ;
 
     npairs = (natoms * (natoms - 1))/2 ;
     double dist[npairs] ;
@@ -66,7 +66,7 @@ void get_distances(double *x, double *y, double *z, const int nframes, const int
     //output_file.open("dum.txt") ;
 
     std::cout << "starting parallel loops" << std::endl ; 
-    #pragma acc data copyin(x[nframes*natoms], y[nframes*natoms], z[nframes*natoms]) copy(parallel_hist[nframes][nbins], dist[npairs], local_dist[npairs], local_hist[nbins])
+    #pragma acc data copyin(x[nframes][natoms], y[nframes][natoms], z[nframes][natoms]) copy(parallel_hist[nframes][nbins], dist[npairs], local_dist[npairs], local_hist[nbins])
     //#pragma acc data copyin(coor[nframes][natoms][3]) copy(dist[npairs], local_dist[npairs], local_hist[nbins])
     {
     for(i=0 ; i < nframes ; i++){
@@ -77,21 +77,15 @@ void get_distances(double *x, double *y, double *z, const int nframes, const int
         #pragma acc parallel loop
         {
         for(j=0 ; j < natoms-1 ; j++){
-            //x1 = x[i][j] ;
-            //y1 = y[i][j] ;
-            //z1 = z[i][j] ;
-            x1 = x[i*j+j] ;
-            y1 = y[i*j+j] ;
-            z1 = z[i*j+j] ;
+            x1 = x[i][j] ;
+            y1 = y[i][j] ;
+            z1 = z[i][j] ;
             #pragma acc loop 
             {
             for(k=j+1 ; k < natoms ; k++){
-                //x2 = x[i][k] ;
-                //y2 = y[i][k] ;
-                //z2 = z[i][k] ;
-                x2 = x[i*k+k] ;
-                y2 = y[i*k+k] ;
-                z2 = z[i*k+k] ;
+                x2 = x[i][k] ;
+                y2 = y[i][k] ;
+                z2 = z[i][k] ;
                 dx2 = (x1 - x2) * (x1 - x2) ;
                 dy2 = (y1 - y2) * (y1 - y2) ;
                 dz2 = (z1 - z2) * (z1 - z2) ;
