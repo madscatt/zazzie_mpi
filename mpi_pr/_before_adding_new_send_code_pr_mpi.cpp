@@ -31,13 +31,9 @@ int main(int argc, char **argv){
     int nbins = 200 ; 
 	double bin_width = 1.0 ;  
 
-    double x[400][148] ;
-    double y[400][148] ;
-    double z[400][148] ;
-
     int xproc_frames = 2 ;
 
-//    double **x, **y, **z ; 	
+    double **x, **y, **z ; 	
     std::cout << "\n\n\n" ;
 	const std::string pdb_filename = "ten_mer.pdb" ;
 	
@@ -45,7 +41,6 @@ int main(int argc, char **argv){
     MPI_Init(&argc, &argv) ;
     MPI_Comm_size(MPI_COMM_WORLD, &size) ;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank) ;
-    MPI_Status status ;
 	
 	util::compile_time(__FILE__, __func__, __DATE__, __TIME__ );
 
@@ -86,15 +81,15 @@ int main(int argc, char **argv){
 	    nframes = mol.number_of_frames ;
 	    natoms  = mol.natoms ;
 
-       // x = new double*[nframes] ;
-       // y = new double*[nframes] ;
-       // z = new double*[nframes] ;
+        x = new double*[nframes] ;
+        y = new double*[nframes] ;
+        z = new double*[nframes] ;
 
-        //for(int i=0 ; i < nframes ; i++){
-         //   x[i] = new double[natoms] ;
-          //  y[i] = new double[natoms] ;
-           // z[i] = new double[natoms] ;
-       // }
+        for(int i=0 ; i < nframes ; i++){
+            x[i] = new double[natoms] ;
+            y[i] = new double[natoms] ;
+            z[i] = new double[natoms] ;
+        }
 
         std::cout << "hello here is some eigen stuff" << "\n" ;
         std::cout << "atom 0: frame 0" << std::endl ;
@@ -134,56 +129,66 @@ int main(int argc, char **argv){
     //const int xn_frames = 1000 ; // nframes ; // number of columns or frames for x coor
     const int xn_frames = read_frames ; // nframes ; // number of columns or frames for x coor
 
+    double **localx = new double*[xn_frames/xproc_frames] ;
+    double **localy = new double*[xn_frames/xproc_frames] ;
+    double **localz = new double*[xn_frames/xproc_frames] ;
 
-    //double **localx = new double*[xn_frames/xproc_frames] ;
-    //double **localy = new double*[xn_frames/xproc_frames] ;
-    //double **localz = new double*[xn_frames/xproc_frames] ;
-    //double **localx = new double*[natoms] ;
-    //double **localy = new double*[natoms] ;
-    //double **localz = new double*[natoms] ;
-
-    double localx[200][148] ;
-    double localy[200][148] ;
-    double localz[200][148] ;
-
-    //for(int i=0 ; i < xn_frames/xproc_frames ; i++){
-    ////for(int i=0 ; i < natoms ; i++){
-      //  localx[i] = new double[natoms] ;
-       // localy[i] = new double[natoms] ;
-        //localz[i] = new double[natoms] ;
-        ////localx[i] = new double[xn_frames/xproc_frames] ;
-        ////localy[i] = new double[xn_frames/xproc_frames] ;
-        ////localz[i] = new double[xn_frames/xproc_frames] ;
-    //}
-
-    //int send_value = natoms * xn_frames / xproc_frames ;
-    int send_value = 200 * 148 ;
- 
-    if(rank == 0){
-        std::cout << "natoms = " << natoms << std::endl ; 
-        std::cout << "send value = " << send_value << std::endl ; 
-        MPI_Send(&(x[0][0]), send_value, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD) ;
-        MPI_Send(&(y[0][0]), send_value, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD) ;
-        MPI_Send(&(z[0][0]), send_value, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD) ;
+    for(int i=0 ; i < xn_frames/xproc_frames ; i++){
+        localx[i] = new double[natoms] ;
+        localy[i] = new double[natoms] ;
+        localz[i] = new double[natoms] ;
     }
-    else{
-        MPI_Recv(&(localx[0][0]), send_value, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status) ;
-        MPI_Recv(&(localy[0][0]), send_value, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status) ;
-        MPI_Recv(&(localz[0][0]), send_value, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status) ;
+        
+    int sizes[2] = {xn_atoms, xn_frames} ;
+    int subsizes[2] = {xn_atoms, xn_frames/xproc_frames} ;
+    int starts[2] = {0, 0} ;
 
-        printf("rank = %i\tlx[0][0] = %lf\n", rank, localx[0][0]);
-        printf("rank = %i\tlx[0][1] = %lf\n", rank, localx[0][1]);
-        printf("rank = %i\tlx[0][2] = %lf\n", rank, localx[0][2]);
-        printf("rank = %i\tlx[0][3] = %lf\n", rank, localx[0][3]);
-        printf("rank = %i\tlx[1][0] = %lf\n", rank, localx[1][0]);
-        printf("rank = %i\tlx[1][1] = %lf\n", rank, localx[1][1]);
-        printf("rank = %i\tlx[1][2] = %lf\n", rank, localx[1][2]);
-        printf("rank = %i\tlx[1][3] = %lf\n", rank, localx[1][3]);
+    MPI_Datatype type, subarrtype ;
+    MPI_Type_create_subarray(2, sizes, subsizes, starts, MPI_ORDER_C, MPI_DOUBLE, &type) ;
+    MPI_Type_create_resized(type, 0, xn_frames/xproc_frames*sizeof(double), &subarrtype) ;
+    MPI_Type_commit(&subarrtype) ;
+
+    int sendcounts[xn_atoms*xproc_frames] ;
+    int displs[xn_atoms*xproc_frames] ;
+    double *globalptrx, *globalptry, *globalptrz ;
+    
+    if(rank == 0) {
+        globalptrx = &(x[0][0]) ;
+        globalptry = &(y[0][0]) ;
+        globalptrz = &(z[0][0]) ;
+    
     }
 
-    //MPI_Finalize() ;
-    //return 0 ;
+    if (rank == 0) {
+        for (i=0; i<xn_atoms*xproc_frames; i++)
+            sendcounts[i] = 1;
+        int disp = 0;
+        for (i=0; i<xn_atoms; i++) {
+            for (j=0; j<xproc_frames; j++) {
+                displs[i*xproc_frames+j] = disp;
+                disp += 1;
+            }
+            disp += ((xn_frames/xproc_frames)-1)*xproc_frames;
+        }
+    }
+
     MPI_Barrier(MPI_COMM_WORLD) ;
+            //xn_atoms*xn_atoms/(xproc_frames*xproc_frames), MPI_DOUBLE,
+ 
+    MPI_Scatterv(&globalptrx[0], sendcounts, displs, subarrtype, &(localx[0][0]),
+                xn_atoms*xn_frames/(xproc_frames), MPI_DOUBLE,
+                0, MPI_COMM_WORLD);
+
+    MPI_Barrier(MPI_COMM_WORLD) ;
+
+    MPI_Scatterv(&globalptry[0], sendcounts, displs, subarrtype, &(localy[0][0]),
+        xn_atoms*xn_frames/(xproc_frames), MPI_DOUBLE,
+        0, MPI_COMM_WORLD);
+
+    MPI_Scatterv(&globalptrz[0], sendcounts, displs, subarrtype, &(localz[0][0]),
+        xn_atoms*xn_frames/(xproc_frames), MPI_DOUBLE,
+        0, MPI_COMM_WORLD);
+
 
 //    std::vector<std::vector<int> > local_hist(xn_frames/xproc_frames, std::vector<int>(nbins, 0));
  //   get_distances(localx, localy, localz, xn_frames/xproc_frames, natoms, local_hist, nbins, bin_width) ; 
@@ -192,20 +197,22 @@ int main(int argc, char **argv){
     for(p = 0 ; p < size ; p++){
         if(rank == p){
             std::cout << "Local process on rank : " << rank << std::endl ;
-            get_distances(&(localx[0][0]), &(localy[0][0]), &(localz[0][0]), xn_frames/xproc_frames, xn_atoms, nbins, bin_width) ; 
+    //        get_distances(localx, localy, localz, xn_frames/xproc_frames, xn_atoms, nbins, bin_width) ; 
        }
     } 
 
+    std::cout << "done with MPI stuff" << std::endl ;  
     MPI_Barrier(MPI_COMM_WORLD) ;
-    std::cout << "\ndone with MPI stuff" << std::endl ;  
 
-    //delete [] localx ; 
-    //delete [] localy ; 
-    //delete [] localz ; 
+    delete [] localx ; 
+    delete [] localy ; 
+    delete [] localz ; 
 
-    //delete [] x ; 
-    //delete [] y ; 
-    //delete [] z ; 
+    MPI_Type_free(&subarrtype) ;
+    
+    delete [] x ; 
+    delete [] y ; 
+    delete [] z ; 
     
     MPI_Finalize() ;
     return 0 ;
